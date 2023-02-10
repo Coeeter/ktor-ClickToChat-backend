@@ -40,7 +40,6 @@ class MongoUserDao(
     }
 
     override suspend fun updateUser(user: User): Boolean {
-        println("Reached here!")
         return collection.updateOne(User::id eq user.id, user)
             .wasAcknowledged()
     }

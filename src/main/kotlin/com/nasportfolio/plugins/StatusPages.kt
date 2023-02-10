@@ -11,11 +11,11 @@ fun Application.configureStatusPages() {
         exception<BadRequestException> { call, _ ->
             call.respond(HttpStatusCode.BadRequest)
         }
-        status(HttpStatusCode.NotFound) { httpStatusCode ->
-            call.respondText(text = "404 Not Found", status = httpStatusCode)
-        }
         exception<Throwable> { call, cause ->
-            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
+            call.respond(
+                message = mapOf("error" to "500: $cause"),
+                status = HttpStatusCode.InternalServerError
+            )
         }
     }
 }
