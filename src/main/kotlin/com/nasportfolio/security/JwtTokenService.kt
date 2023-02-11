@@ -2,7 +2,6 @@ package com.nasportfolio.security
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import io.ktor.server.auth.jwt.*
 import java.util.*
 
 class JwtTokenService : TokenService {
@@ -18,8 +17,4 @@ class JwtTokenService : TokenService {
         .withExpiresAt(Date(System.currentTimeMillis() + expiresIn))
         .apply { claims.forEach { withClaim(it.key, it.value) } }
         .sign(Algorithm.HMAC256(secret))
-}
-
-fun JWTPrincipal.getUserId(): String {
-    return payload.getClaim("userId").asString()
 }

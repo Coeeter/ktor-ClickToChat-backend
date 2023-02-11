@@ -2,8 +2,10 @@ val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
 val kmongo_version: String by project
-val commons_codec_version: String by project
 val koin_version: String by project
+val firebase_version: String by project
+val bcrypt_version: String by project
+val log_version: String by project
 
 plugins {
     kotlin("jvm") version "1.8.10"
@@ -42,9 +44,12 @@ dependencies {
     implementation("org.litote.kmongo:kmongo:$kmongo_version")
     implementation("org.litote.kmongo:kmongo-coroutine:$kmongo_version")
 
-    implementation("commons-codec:commons-codec:$commons_codec_version")
-
     implementation("io.insert-koin:koin-core:$koin_version")
     implementation("io.insert-koin:koin-ktor:$koin_version")
     implementation("io.insert-koin:koin-logger-slf4j:$koin_version")
+
+    implementation("com.google.firebase:firebase-admin:$firebase_version")
+
+    implementation("at.favre.lib:bcrypt:$bcrypt_version")
+    implementation("org.slf4j:slf4j-jdk14:$log_version")
 }

@@ -1,5 +1,6 @@
 package com.nasportfolio.data.message
 
+import org.bson.types.ObjectId
 import org.litote.kmongo.and
 import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.eq
@@ -19,17 +20,16 @@ class MongoMessageDao(
             .toList()
     }
 
+    override suspend fun getMessageById(messageId: String): Message? {
+        return collection.findOne(Message::id eq ObjectId(messageId))
+    }
+
     override suspend fun insertMessage(message: Message): Boolean {
         return collection.insertOne(message).wasAcknowledged()
     }
 
     override suspend fun updateMessage(message: Message): Boolean {
         return collection.updateOne(Message::id eq message.id, message)
-            .wasAcknowledged()
-    }
-
-    override suspend fun deleteMessage(message: Message): Boolean {
-        return collection.deleteOne(Message::id eq message.id)
             .wasAcknowledged()
     }
 }

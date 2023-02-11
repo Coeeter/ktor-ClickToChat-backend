@@ -5,7 +5,7 @@ interface TokenService {
         secret: String = System.getenv("JWT_SECRET"),
         audience: String = DEFAULT_AUDIENCE,
         issuer: String = DEFAULT_ISSUER,
-        expiresIn: Long =  DEFAULT_EXPIRES_IN,
+        expiresIn: Long = DEFAULT_EXPIRES_IN,
         claims: List<TokenClaim>
     ): String
 

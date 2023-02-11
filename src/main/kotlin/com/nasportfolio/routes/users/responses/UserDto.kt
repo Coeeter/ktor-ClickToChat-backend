@@ -8,7 +8,8 @@ data class UserDto(
     val id: String,
     val username: String,
     val email: String,
-    val createdAtTimestamp: Long
+    val createdAtTimestamp: Long,
+    val imageUrl: String? = null,
 )
 
 fun User.toUserDto(): UserDto {
@@ -16,6 +17,7 @@ fun User.toUserDto(): UserDto {
         username = username,
         email = email,
         createdAtTimestamp = createdAtTimeStamp,
-        id = id.toHexString()
+        id = id.toHexString(),
+        imageUrl = imageUrl
     )
 }

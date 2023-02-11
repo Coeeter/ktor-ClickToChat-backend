@@ -2,14 +2,18 @@ package com.nasportfolio.plugins
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.nasportfolio.data.user.UserDao
 import com.nasportfolio.security.TokenService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
+import org.koin.ktor.ext.inject
 
 fun Application.configureSecurity() {
+    val userDao by inject<UserDao>()
+
     authentication {
         jwt {
             realm = "ClickToChat"
@@ -20,11 +24,9 @@ fun Application.configureSecurity() {
                 .build()
             verifier(verifier)
             validate { credential ->
-                val isValidToken = credential.payload
-                    .audience
-                    .contains(TokenService.DEFAULT_AUDIENCE)
-                if (!isValidToken) return@validate null
-                JWTPrincipal(credential.payload)
+                credential.payload.getClaim("userId")?.asString()?.let {
+                    userDao.getUserById(id = it)
+                }
             }
             challenge { _, _ ->
                 call.respond(
