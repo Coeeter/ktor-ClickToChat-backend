@@ -110,6 +110,11 @@ private fun Route.chatSocket(messageService: MessageService) {
                         senderId = userId,
                         receiverId = request.receiverId!!
                     )
+
+                    SocketRequestType.MESSAGE_SEEN -> messageService.setMessagesSeen(
+                        receiverId = request.messageSeenRequest!!.receiverId,
+                        messagesSeen = request.messageSeenRequest.messages
+                    )
                 }
             }
         } catch (e: MessageNotFoundException) {

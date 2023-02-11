@@ -4,6 +4,7 @@ import org.bson.types.ObjectId
 import org.litote.kmongo.and
 import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.eq
+import org.litote.kmongo.`in`
 
 class MongoMessageDao(
     db: CoroutineDatabase
@@ -15,6 +16,13 @@ class MongoMessageDao(
             Message::senderId eq senderId,
             Message::receiverId eq receiverId
         )
+        return collection.find(query)
+            .descendingSort(Message::updatedAtTimestamp)
+            .toList()
+    }
+
+    override suspend fun getMessageInIdList(messageIdList: List<String>): List<Message> {
+        val query = Message::id `in` messageIdList.map { ObjectId(it) }
         return collection.find(query)
             .descendingSort(Message::updatedAtTimestamp)
             .toList()

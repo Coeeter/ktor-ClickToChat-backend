@@ -10,5 +10,6 @@ data class Message(
     val createdAtTimestamp: Long,
     val updatedAtTimestamp: Long,
     val imageUrl: String? = null,
+    val seen: Boolean = false,
     @BsonId val id: ObjectId = ObjectId()
 )

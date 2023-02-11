@@ -63,6 +63,23 @@ class MessageService(
         return imageDao.uploadImage(name, byteArray)
     }
 
+    suspend fun setMessagesSeen(
+        receiverId: String,
+        messagesSeen: List<String>
+    ) {
+        val messages = messageDao.getMessageInIdList(messagesSeen)
+        val updatedMessages = messages.map {
+            it.copy(seen = true).toMessageDto()
+        }
+        val json = Json.encodeToString(
+            value = SocketResponse(
+                type = SocketResponseType.SEEN_MESSAGES,
+                messagesSeen = updatedMessages
+            )
+        )
+        sockets[receiverId]?.send(json)
+    }
+
     suspend fun sendUserTyping(
         senderId: String,
         receiverId: String

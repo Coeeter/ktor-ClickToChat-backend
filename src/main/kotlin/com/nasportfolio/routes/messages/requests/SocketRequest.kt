@@ -7,9 +7,14 @@ data class SocketRequest(
     val type: SocketRequestType,
     val createMessageRequest: CreateMessageRequest? = null,
     val updateMessageRequest: UpdateMessageRequest? = null,
-    val receiverId: String? = null
+    val receiverId: String? = null,
+    val messageSeenRequest: MessageSeenRequest? = null,
 )
 
 enum class SocketRequestType {
-    CREATE, UPDATE, TYPING, STOP_TYPING
+    CREATE,
+    UPDATE,
+    TYPING,
+    STOP_TYPING,
+    MESSAGE_SEEN
 }

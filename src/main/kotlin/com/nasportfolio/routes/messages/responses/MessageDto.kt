@@ -12,6 +12,7 @@ data class MessageDto(
     val createdAtTimestamp: Long,
     val updatedAtTimestamp: Long,
     val imageUrl: String?,
+    val seen: Boolean,
 )
 
 fun Message.toMessageDto(): MessageDto {
@@ -23,5 +24,6 @@ fun Message.toMessageDto(): MessageDto {
         createdAtTimestamp = createdAtTimestamp,
         updatedAtTimestamp = updatedAtTimestamp,
         imageUrl = imageUrl,
+        seen = seen
     )
 }
