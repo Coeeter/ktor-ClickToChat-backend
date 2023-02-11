@@ -12,12 +12,9 @@ data class MessageDto(
     val createdAtTimestamp: Long,
     val updatedAtTimestamp: Long,
     val imageUrl: String?,
-    val type: MessageType
 )
 
-enum class MessageType { CREATE, UPDATE, GET }
-
-fun Message.toMessageDto(type: MessageType): MessageDto {
+fun Message.toMessageDto(): MessageDto {
     return MessageDto(
         id = id.toString(),
         senderId = senderId,
@@ -26,6 +23,5 @@ fun Message.toMessageDto(type: MessageType): MessageDto {
         createdAtTimestamp = createdAtTimestamp,
         updatedAtTimestamp = updatedAtTimestamp,
         imageUrl = imageUrl,
-        type = type
     )
 }

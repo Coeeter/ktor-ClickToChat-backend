@@ -100,6 +100,16 @@ private fun Route.chatSocket(messageService: MessageService) {
                         messageId = request.updateMessageRequest.messageId!!,
                         message = request.updateMessageRequest.message,
                     )
+
+                    SocketRequestType.TYPING -> messageService.sendUserTyping(
+                        senderId = userId,
+                        receiverId = request.receiverId!!
+                    )
+
+                    SocketRequestType.STOP_TYPING -> messageService.sendUserStopTyping(
+                        senderId = userId,
+                        receiverId = request.receiverId!!
+                    )
                 }
             }
         } catch (e: MessageNotFoundException) {

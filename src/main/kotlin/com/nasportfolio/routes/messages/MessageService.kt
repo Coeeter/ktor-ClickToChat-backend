@@ -9,7 +9,8 @@ import com.nasportfolio.routes.messages.exceptions.InvalidKeyException
 import com.nasportfolio.routes.messages.exceptions.MessageNotFoundException
 import com.nasportfolio.routes.messages.exceptions.UserAlreadyConnectedException
 import com.nasportfolio.routes.messages.responses.MessageDto
-import com.nasportfolio.routes.messages.responses.MessageType
+import com.nasportfolio.routes.messages.responses.SocketResponse
+import com.nasportfolio.routes.messages.responses.SocketResponseType
 import com.nasportfolio.routes.messages.responses.toMessageDto
 import io.ktor.websocket.*
 import kotlinx.serialization.encodeToString
@@ -54,12 +55,38 @@ class MessageService(
         receiverId: String
     ): List<MessageDto> {
         return messageDao.getAllMessagesOfChat(userId, receiverId).map { message ->
-            message.toMessageDto(type = MessageType.GET)
+            message.toMessageDto()
         }
     }
 
     suspend fun uploadImage(name: String, byteArray: ByteArray): String {
         return imageDao.uploadImage(name, byteArray)
+    }
+
+    suspend fun sendUserTyping(
+        senderId: String,
+        receiverId: String
+    ) {
+        val json = Json.encodeToString(
+            value = SocketResponse(
+                type = SocketResponseType.USER_TYPING,
+                senderId = senderId
+            )
+        )
+        sockets[receiverId]?.send(json)
+    }
+
+    suspend fun sendUserStopTyping(
+        senderId: String,
+        receiverId: String
+    ) {
+        val json = Json.encodeToString(
+            value = SocketResponse(
+                type = SocketResponseType.USER_STOP_TYPING,
+                senderId = senderId,
+            )
+        )
+        sockets[receiverId]?.send(json)
     }
 
     suspend fun createMessage(
@@ -77,10 +104,12 @@ class MessageService(
             createdAtTimestamp = timeNow,
             updatedAtTimestamp = timeNow,
         )
-        val messageDto = msg.toMessageDto(
-            type = MessageType.CREATE
+        val json = Json.encodeToString(
+            value = SocketResponse(
+                type = SocketResponseType.CREATE_MESSAGE,
+                message = msg.toMessageDto()
+            )
         )
-        val json = Json.encodeToString(messageDto)
         sockets[senderId]?.send(json)
         sockets[receiverId]?.send(json)
         messageDao.insertMessage(msg)
@@ -112,10 +141,12 @@ class MessageService(
             message = message ?: msg.message,
             updatedAtTimestamp = System.currentTimeMillis()
         )
-        val messageDto = updatedMessage.toMessageDto(
-            type = MessageType.UPDATE
+        val json = Json.encodeToString(
+            value = SocketResponse(
+                type = SocketResponseType.UPDATE_MESSAGE,
+                message = updatedMessage.toMessageDto()
+            )
         )
-        val json = Json.encodeToString(messageDto)
         sockets[senderId]?.send(json)
         sockets[receiverId]?.send(json)
         messageDao.updateMessage(updatedMessage)
