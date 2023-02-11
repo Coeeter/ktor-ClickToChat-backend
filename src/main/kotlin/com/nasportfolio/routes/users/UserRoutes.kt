@@ -176,6 +176,7 @@ private fun Route.uploadImage(userDao: UserDao, imageDao: ImageDao) {
                         val fileExtension = part.originalFileName?.takeLastWhile { it != '.' }
                         val fileName = UUID.randomUUID().toString() + '.' + fileExtension
                         val imageUrl = imageDao.uploadImage(fileName, byteArray)
+                        user.imageUrl?.let { imageDao.deleteImage(it) }
                         val updatedUser = user.copy(imageUrl = imageUrl)
                         userDao.updateUser(updatedUser)
                         call.respond(updatedUser.toUserDto())
@@ -193,7 +194,7 @@ private fun Route.deleteImage(userDao: UserDao, imageDao: ImageDao) {
     authenticate {
         delete("/api/users/images") {
             val user = call.user!!
-            user.imageUrl?.let { key -> imageDao.deleteImage(key) }
+            user.imageUrl?.let { url -> imageDao.deleteImage(url) }
             val updatedUser = user.copy(imageUrl = null)
             userDao.updateUser(updatedUser)
             call.respond(updatedUser.toUserDto())
