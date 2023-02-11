@@ -25,6 +25,7 @@ import java.util.*
 fun Route.messageRoutes() {
     val messageService by inject<MessageService>()
     getAllMessagesOfChat(messageService)
+    getAllMessagesToUser(messageService)
     uploadImage(messageService)
     authenticateSocket(messageService)
     chatSocket(messageService)
@@ -35,7 +36,21 @@ private fun Route.getAllMessagesOfChat(messageService: MessageService) {
         get("/api/messages/{receiverId}") {
             val userId = call.user!!.id.toString()
             val receiverId = call.parameters["receiverId"]!!
-            call.respond(messageService.getMessagesOfChat(userId, receiverId))
+            try {
+                val participants = listOf(userId, receiverId)
+                call.respond(messageService.getMessagesOfChat(participants))
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+    }
+}
+
+private fun Route.getAllMessagesToUser(messageService: MessageService) {
+    authenticate {
+        get("/api/messages") {
+            val userId = call.user!!.id.toString()
+            call.respond(messageService.getAllMessagesOfUser(userId = userId))
         }
     }
 }
@@ -64,7 +79,7 @@ private fun Route.uploadImage(messageService: MessageService) {
 
 private fun Route.authenticateSocket(messageService: MessageService) {
     authenticate {
-        get("/api/messages") {
+        get("/api/messages/authenticate") {
             val user = call.user!!
             val key = messageService.generateKey(user.id.toString())
             val url = "/api/messages/chat-socket?u=${user.id}&k=$key"

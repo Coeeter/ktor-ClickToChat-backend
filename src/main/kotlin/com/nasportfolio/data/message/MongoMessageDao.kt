@@ -1,31 +1,38 @@
 package com.nasportfolio.data.message
 
 import org.bson.types.ObjectId
-import org.litote.kmongo.SetTo
-import org.litote.kmongo.and
+import org.litote.kmongo.*
 import org.litote.kmongo.coroutine.CoroutineDatabase
-import org.litote.kmongo.eq
-import org.litote.kmongo.`in`
 
 class MongoMessageDao(
     db: CoroutineDatabase
 ) : MessageDao {
     private val collection = db.getCollection<Message>()
 
-    override suspend fun getAllMessagesOfChat(senderId: String, receiverId: String): List<Message> {
+    override suspend fun getAllMessagesOfChat(participants: List<String>): List<Message> {
         val query = and(
-            Message::senderId eq senderId,
-            Message::receiverId eq receiverId
+            Message::senderId `in` participants,
+            Message::receiverId `in` participants
         )
         return collection.find(query)
-            .descendingSort(Message::updatedAtTimestamp)
+            .descendingSort(Message::createdAtTimestamp)
+            .toList()
+    }
+
+    override suspend fun getAllMessagesOfUser(userId: String): List<Message> {
+        val query = or(
+            Message::receiverId eq userId,
+            Message::senderId eq userId
+        )
+        return collection.find(query)
+            .descendingSort(Message::createdAtTimestamp)
             .toList()
     }
 
     override suspend fun getMessageInIdList(messageIdList: List<String>): List<Message> {
         val query = Message::id `in` messageIdList.map { ObjectId(it) }
         return collection.find(query)
-            .descendingSort(Message::updatedAtTimestamp)
+            .descendingSort(Message::createdAtTimestamp)
             .toList()
     }
 

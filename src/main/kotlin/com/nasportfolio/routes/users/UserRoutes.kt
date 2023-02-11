@@ -49,9 +49,13 @@ private fun Route.getAllUsersRoute(userDao: UserDao) {
 private fun Route.getUserById(userDao: UserDao) {
     get(path = "/api/users/{userId}") {
         val userId = call.parameters["userId"]!!
-        val user = userDao.getUserById(userId)
-        user ?: return@get call.respond(HttpStatusCode.NotFound)
-        call.respond(user.toUserDto())
+        try {
+            val user = userDao.getUserById(userId)
+            user ?: return@get call.respond(HttpStatusCode.NotFound)
+            call.respond(user.toUserDto())
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.NotFound)
+        }
     }
 }
 

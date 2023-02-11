@@ -50,11 +50,14 @@ class MessageService(
         sockets[userId] = socket
     }
 
-    suspend fun getMessagesOfChat(
-        userId: String,
-        receiverId: String
-    ): List<MessageDto> {
-        return messageDao.getAllMessagesOfChat(userId, receiverId).map { message ->
+    suspend fun getMessagesOfChat(participants: List<String>): List<MessageDto> {
+        return messageDao.getAllMessagesOfChat(participants).map { message ->
+            message.toMessageDto()
+        }
+    }
+
+    suspend fun getAllMessagesOfUser(userId: String): List<MessageDto> {
+        return messageDao.getAllMessagesOfUser(userId).map { message ->
             message.toMessageDto()
         }
     }

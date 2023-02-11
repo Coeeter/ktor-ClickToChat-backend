@@ -1,7 +1,8 @@
 package com.nasportfolio.data.message
 
 interface MessageDao {
-    suspend fun getAllMessagesOfChat(senderId: String, receiverId: String): List<Message>
+    suspend fun getAllMessagesOfChat(participants: List<String>): List<Message>
+    suspend fun getAllMessagesOfUser(userId: String): List<Message>
     suspend fun getMessageInIdList(messageIdList: List<String>): List<Message>
     suspend fun getMessageById(messageId: String): Message?
     suspend fun insertMessage(message: Message): Boolean
