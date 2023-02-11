@@ -37,7 +37,7 @@ fun Route.userRoutes() {
     validateToken()
     uploadImage(userDao, imageDao)
     deleteImage(userDao, imageDao)
-    getUserByUsername(userDao)
+    getUserById(userDao)
 }
 
 private fun Route.getAllUsersRoute(userDao: UserDao) {
@@ -46,10 +46,10 @@ private fun Route.getAllUsersRoute(userDao: UserDao) {
     }
 }
 
-private fun Route.getUserByUsername(userDao: UserDao) {
-    get(path = "/api/users/{username}") {
-        val username = call.parameters["username"]!!
-        val user = userDao.getUserByUsername(username)
+private fun Route.getUserById(userDao: UserDao) {
+    get(path = "/api/users/{userId}") {
+        val userId = call.parameters["userId"]!!
+        val user = userDao.getUserById(userId)
         user ?: return@get call.respond(HttpStatusCode.NotFound)
         call.respond(user.toUserDto())
     }
@@ -76,6 +76,22 @@ private fun Route.updateAccount(userDao: UserDao) {
                 email = body.email ?: user.email,
                 fcmToken = body.fcmToken ?: user.fcmToken
             )
+            body.email?.let { email ->
+                userDao.getUserByEmail(email)
+            }?.let {
+                return@put call.respond(
+                    status = HttpStatusCode.BadRequest,
+                    message = mapOf("error" to "Email already in use!")
+                )
+            }
+            body.username?.let { username ->
+                userDao.getUserByUsername(username)
+            }?.let {
+                return@put call.respond(
+                    status = HttpStatusCode.BadRequest,
+                    message = mapOf("error" to "Username already in use!")
+                )
+            }
             userDao.updateUser(updatedUser)
             call.respond(updatedUser.toUserDto())
         }
@@ -97,6 +113,18 @@ private fun Route.register(
             fcmToken = body.fcmToken,
             createdAtTimeStamp = System.currentTimeMillis()
         )
+        userDao.getUserByEmail(body.email)?.let {
+            return@post call.respond(
+                status = HttpStatusCode.BadRequest,
+                message = mapOf("error" to "Email already in use!")
+            )
+        }
+        userDao.getUserByUsername(body.username)?.let {
+            return@post call.respond(
+                status = HttpStatusCode.BadRequest,
+                message = mapOf("error" to "Username already in use!")
+            )
+        }
         userDao.insertUser(user)
         val token = tokenService.generateToken(
             claims = listOf(
