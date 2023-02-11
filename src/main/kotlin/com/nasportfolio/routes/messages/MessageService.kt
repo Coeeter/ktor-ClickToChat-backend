@@ -41,7 +41,10 @@ class MessageService(
     ) {
         if (sockets.containsKey(userId)) throw UserAlreadyConnectedException()
         if (keys[userId]?.id != key) throw InvalidKeyException()
-        if (System.currentTimeMillis() >= keys[userId]!!.expiresAt) throw InvalidKeyException()
+        if (System.currentTimeMillis() >= keys[userId]!!.expiresAt) {
+            keys.remove(userId)
+            throw InvalidKeyException()
+        }
         keys.remove(userId)
         sockets[userId] = socket
     }
