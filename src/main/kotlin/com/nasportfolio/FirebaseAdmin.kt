@@ -12,7 +12,7 @@ object FirebaseAdmin {
 
     private val options = FirebaseOptions.builder()
         .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-        .setStorageBucket(System.getenv("STORAGE_BUCKET_NAME"))
+        .setStorageBucket(EnvConfig.storageBucketName)
         .build()
 
     fun init(): FirebaseApp = FirebaseApp.initializeApp(options)

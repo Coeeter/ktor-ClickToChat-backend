@@ -3,6 +3,7 @@ package com.nasportfolio.di
 import at.favre.lib.crypto.bcrypt.BCrypt
 import com.google.firebase.cloud.StorageClient
 import com.google.firebase.messaging.FirebaseMessaging
+import com.nasportfolio.EnvConfig
 import com.nasportfolio.data.images.FirebaseImageDao
 import com.nasportfolio.data.images.ImageDao
 import com.nasportfolio.data.message.MessageDao
@@ -34,14 +35,11 @@ val mainModule = module {
     } bind HashingService::class
 
     single {
-        val password = System.getenv("MONGO_PASSWORD")
-        val database = System.getenv("DATABASE")
-        val connectionString = "mongodb+srv://" +
-                "Coeeter:$password@cluster0.0y8th62.mongodb.net/" +
-                "?retryWrites=true&w=majority"
+        val connectionString = "mongodb+srv://Coeeter:${EnvConfig.mongoDbPassword}" +
+                "@cluster0.0y8th62.mongodb.net/?retryWrites=true&w=majority"
         KMongo.createClient(connectionString)
             .coroutine
-            .getDatabase(database)
+            .getDatabase(EnvConfig.databaseName)
     }
 
     single {

@@ -1,8 +1,10 @@
 package com.nasportfolio.security
 
+import com.nasportfolio.EnvConfig
+
 interface TokenService {
     fun generateToken(
-        secret: String = System.getenv("JWT_SECRET"),
+        secret: String = EnvConfig.jwtSecret,
         audience: String = DEFAULT_AUDIENCE,
         issuer: String = DEFAULT_ISSUER,
         expiresIn: Long = DEFAULT_EXPIRES_IN,
