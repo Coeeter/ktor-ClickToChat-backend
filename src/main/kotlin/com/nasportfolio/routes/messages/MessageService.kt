@@ -23,12 +23,15 @@ class MessageService(
     private val notificationDao: NotificationDao,
     private val imageDao: ImageDao
 ) {
-    private val keys = ConcurrentHashMap<String, String>()
+    private val keys = ConcurrentHashMap<String, SocketKey>()
     private val sockets = ConcurrentHashMap<String, WebSocketSession>()
 
     fun generateKey(userId: String): String {
-        keys[userId] = UUID.randomUUID().toString()
-        return keys[userId]!!
+        keys[userId] = SocketKey(
+            id = UUID.randomUUID().toString(),
+            expiresAt = System.currentTimeMillis() + 10L * 60L * 1000L
+        )
+        return keys[userId]!!.id
     }
 
     fun onJoin(
@@ -37,7 +40,8 @@ class MessageService(
         socket: WebSocketSession
     ) {
         if (sockets.containsKey(userId)) throw UserAlreadyConnectedException()
-        if (keys[userId] != key) throw InvalidKeyException()
+        if (keys[userId]?.id != key) throw InvalidKeyException()
+        if (System.currentTimeMillis() >= keys[userId]!!.expiresAt) throw InvalidKeyException()
         keys.remove(userId)
         sockets[userId] = socket
     }
@@ -120,4 +124,9 @@ class MessageService(
             sockets.remove(userId)
         }
     }
+
+    private data class SocketKey(
+        val id: String,
+        val expiresAt: Long
+    )
 }
