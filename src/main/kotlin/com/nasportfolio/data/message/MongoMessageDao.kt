@@ -1,6 +1,7 @@
 package com.nasportfolio.data.message
 
 import org.bson.types.ObjectId
+import org.litote.kmongo.SetTo
 import org.litote.kmongo.and
 import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.eq
@@ -38,6 +39,13 @@ class MongoMessageDao(
 
     override suspend fun updateMessage(message: Message): Boolean {
         return collection.updateOne(Message::id eq message.id, message)
+            .wasAcknowledged()
+    }
+
+    override suspend fun setMultipleMessagesSeen(messageIdList: List<String>): Boolean {
+        val query = Message::id `in` messageIdList.map { ObjectId(it) }
+        val updates = SetTo(Message::seen, true)
+        return collection.updateMany(query, updates)
             .wasAcknowledged()
     }
 }

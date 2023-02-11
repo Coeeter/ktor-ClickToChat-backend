@@ -6,4 +6,5 @@ interface MessageDao {
     suspend fun getMessageById(messageId: String): Message?
     suspend fun insertMessage(message: Message): Boolean
     suspend fun updateMessage(message: Message): Boolean
+    suspend fun setMultipleMessagesSeen(messageIdList: List<String>): Boolean
 }

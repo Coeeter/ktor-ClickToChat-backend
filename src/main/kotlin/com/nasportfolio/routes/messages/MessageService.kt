@@ -77,6 +77,9 @@ class MessageService(
                 messagesSeen = updatedMessages
             )
         )
+        messageDao.setMultipleMessagesSeen(
+            messageIdList = updatedMessages.map { it.id }
+        )
         sockets[receiverId]?.send(json)
     }
 
