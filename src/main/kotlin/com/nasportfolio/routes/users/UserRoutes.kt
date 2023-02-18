@@ -10,8 +10,8 @@ import com.nasportfolio.routes.users.requests.UpdateAccountRequest
 import com.nasportfolio.routes.users.requests.UpdatePasswordRequest
 import com.nasportfolio.routes.users.responses.TokenResponse
 import com.nasportfolio.routes.users.responses.toUserDto
-import com.nasportfolio.security.HashingService
-import com.nasportfolio.security.TokenService
+import com.nasportfolio.services.security.HashingService
+import com.nasportfolio.services.security.TokenService
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
@@ -28,28 +28,30 @@ fun Route.userRoutes() {
     val hashingService by inject<HashingService>()
     val imageDao by inject<ImageDao>()
 
-    getAllUsersRoute(userDao)
-    searchForUsers(userDao)
-    updateAccount(userDao)
-    updatePassword(userDao, hashingService)
-    register(userDao, tokenService, hashingService)
-    login(userDao, tokenService, hashingService)
-    deleteAccount(userDao)
-    deleteToken(userDao)
-    validateToken()
-    uploadImage(userDao, imageDao)
-    deleteImage(userDao, imageDao)
-    getUserById(userDao)
+    route("/users") {
+        getAllUsersRoute(userDao)
+        searchForUsers(userDao)
+        updateAccount(userDao)
+        updatePassword(userDao, hashingService)
+        register(userDao, tokenService, hashingService)
+        login(userDao, tokenService, hashingService)
+        deleteAccount(userDao)
+        deleteToken(userDao)
+        validateToken()
+        uploadImage(userDao, imageDao)
+        deleteImage(userDao, imageDao)
+        getUserById(userDao)
+    }
 }
 
 private fun Route.getAllUsersRoute(userDao: UserDao) {
-    get(path = "/api/users") {
+    get {
         call.respond(userDao.getAllUsers().map { it.toUserDto() })
     }
 }
 
 private fun Route.getUserById(userDao: UserDao) {
-    get(path = "/api/users/{userId}") {
+    get(path = "/{userId}") {
         val userId = call.parameters["userId"]!!
         try {
             val user = userDao.getUserById(userId)
@@ -62,7 +64,7 @@ private fun Route.getUserById(userDao: UserDao) {
 }
 
 private fun Route.searchForUsers(userDao: UserDao) {
-    get(path = "/api/users/search") {
+    get(path = "/search") {
         val query = call.request.queryParameters["q"]
         query ?: return@get call.respond(HttpStatusCode.BadRequest)
         val users = userDao.searchUsersByUsername(query).map {
@@ -74,7 +76,7 @@ private fun Route.searchForUsers(userDao: UserDao) {
 
 private fun Route.updateAccount(userDao: UserDao) {
     authenticate {
-        put(path = "/api/users") {
+        put {
             val user = call.user!!
             val body = call.receive<UpdateAccountRequest>()
             val updatedUser = user.copy(
@@ -109,7 +111,7 @@ private fun Route.updatePassword(
     hashingService: HashingService
 ) {
     authenticate {
-        put("/api/users/password") {
+        put("/password") {
             val user = call.user!!
             val request = call.receive<UpdatePasswordRequest>()
             val isCorrectOldPassword = hashingService.verify(request.oldPassword, user.password)
@@ -136,7 +138,7 @@ private fun Route.register(
     tokenService: TokenService,
     hashingService: HashingService
 ) {
-    post("/api/users/register") {
+    post("/register") {
         val body = call.receive<SignUpRequest>()
         val hashedPassword = hashingService.hash(body.password)
         val user = User(
@@ -176,7 +178,7 @@ private fun Route.login(
     tokenService: TokenService,
     hashingService: HashingService
 ) {
-    post("/api/users/login") {
+    post("/login") {
         val body = call.receive<LoginRequest>()
         val user = userDao.getUserByEmail(body.email)
         user ?: return@post call.respond(HttpStatusCode.NotFound)
@@ -197,7 +199,7 @@ private fun Route.login(
 
 private fun Route.deleteAccount(userDao: UserDao) {
     authenticate {
-        delete("/api/users") {
+        delete {
             val user = call.user!!
             userDao.deleteUser(user)
             call.respond(HttpStatusCode.OK)
@@ -207,7 +209,7 @@ private fun Route.deleteAccount(userDao: UserDao) {
 
 private fun Route.deleteToken(userDao: UserDao) {
     authenticate {
-        delete("/api/users/token") {
+        delete("/token") {
             val user = call.user!!
             val updatedUser = user.copy(fcmToken = null)
             userDao.updateUser(updatedUser)
@@ -218,7 +220,7 @@ private fun Route.deleteToken(userDao: UserDao) {
 
 private fun Route.validateToken() {
     authenticate {
-        get("/api/users/validate-token") {
+        get("/validate-token") {
             val user = call.user!!
             call.respond(user.toUserDto())
         }
@@ -227,7 +229,7 @@ private fun Route.validateToken() {
 
 private fun Route.uploadImage(userDao: UserDao, imageDao: ImageDao) {
     authenticate {
-        post("/api/users/images") {
+        post("/images") {
             val user = call.user!!
             val request = call.receiveMultipart()
             request.forEachPart { part ->
@@ -253,7 +255,7 @@ private fun Route.uploadImage(userDao: UserDao, imageDao: ImageDao) {
 
 private fun Route.deleteImage(userDao: UserDao, imageDao: ImageDao) {
     authenticate {
-        delete("/api/users/images") {
+        delete("/images") {
             val user = call.user!!
             user.imageUrl?.let { url -> imageDao.deleteImage(url) }
             val updatedUser = user.copy(imageUrl = null)

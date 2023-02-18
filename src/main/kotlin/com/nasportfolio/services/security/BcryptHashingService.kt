@@ -1,4 +1,4 @@
-package com.nasportfolio.security
+package com.nasportfolio.services.security
 
 import at.favre.lib.crypto.bcrypt.BCrypt.Hasher
 import at.favre.lib.crypto.bcrypt.BCrypt.Verifyer

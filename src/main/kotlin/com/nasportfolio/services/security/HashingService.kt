@@ -1,4 +1,4 @@
-package com.nasportfolio.security
+package com.nasportfolio.services.security
 
 interface HashingService {
     fun hash(value: String): String

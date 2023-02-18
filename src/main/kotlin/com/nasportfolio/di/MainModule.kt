@@ -8,15 +8,15 @@ import com.nasportfolio.data.images.FirebaseImageDao
 import com.nasportfolio.data.images.ImageDao
 import com.nasportfolio.data.message.MessageDao
 import com.nasportfolio.data.message.MongoMessageDao
-import com.nasportfolio.data.notifications.FcmNotificationDao
-import com.nasportfolio.data.notifications.NotificationDao
 import com.nasportfolio.data.user.MongoUserDao
 import com.nasportfolio.data.user.UserDao
 import com.nasportfolio.routes.messages.MessageService
-import com.nasportfolio.security.BcryptHashingService
-import com.nasportfolio.security.HashingService
-import com.nasportfolio.security.JwtTokenService
-import com.nasportfolio.security.TokenService
+import com.nasportfolio.services.notifications.FcmNotificationService
+import com.nasportfolio.services.notifications.NotificationService
+import com.nasportfolio.services.security.BcryptHashingService
+import com.nasportfolio.services.security.HashingService
+import com.nasportfolio.services.security.JwtTokenService
+import com.nasportfolio.services.security.TokenService
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.litote.kmongo.coroutine.coroutine
@@ -51,8 +51,8 @@ val mainModule = module {
     } bind MessageDao::class
 
     single {
-        FcmNotificationDao(FirebaseMessaging.getInstance())
-    } bind NotificationDao::class
+        FcmNotificationService(FirebaseMessaging.getInstance())
+    } bind NotificationService::class
 
     single {
         FirebaseImageDao(StorageClient.getInstance().bucket())

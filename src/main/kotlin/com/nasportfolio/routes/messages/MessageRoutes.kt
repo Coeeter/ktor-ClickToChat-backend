@@ -24,16 +24,19 @@ import java.util.*
 
 fun Route.messageRoutes() {
     val messageService by inject<MessageService>()
-    getAllMessagesOfChat(messageService)
-    getAllMessagesToUser(messageService)
-    uploadImage(messageService)
-    authenticateSocket(messageService)
-    chatSocket(messageService)
+
+    route(path = "/messages") {
+        getAllMessagesOfChat(messageService)
+        getAllMessagesToUser(messageService)
+        uploadImage(messageService)
+        authenticateSocket(messageService)
+        chatSocket(messageService)
+    }
 }
 
 private fun Route.getAllMessagesOfChat(messageService: MessageService) {
     authenticate {
-        get("/api/messages/{receiverId}") {
+        get("/{receiverId}") {
             val userId = call.user!!.id.toString()
             val receiverId = call.parameters["receiverId"]!!
             try {
@@ -48,7 +51,7 @@ private fun Route.getAllMessagesOfChat(messageService: MessageService) {
 
 private fun Route.getAllMessagesToUser(messageService: MessageService) {
     authenticate {
-        get("/api/messages") {
+        get {
             val userId = call.user!!.id.toString()
             call.respond(messageService.getAllMessagesOfUser(userId = userId))
         }
@@ -57,7 +60,7 @@ private fun Route.getAllMessagesToUser(messageService: MessageService) {
 
 private fun Route.uploadImage(messageService: MessageService) {
     authenticate {
-        post("/api/messages/images") {
+        post("/images") {
             val multipart = call.receiveMultipart()
             multipart.forEachPart { part ->
                 when (part) {
@@ -79,7 +82,7 @@ private fun Route.uploadImage(messageService: MessageService) {
 
 private fun Route.authenticateSocket(messageService: MessageService) {
     authenticate {
-        get("/api/messages/authenticate") {
+        get("/authenticate") {
             val user = call.user!!
             val key = messageService.generateKey(user.id.toString())
             val url = "/api/messages/chat-socket?u=${user.id}&k=$key"
@@ -89,7 +92,7 @@ private fun Route.authenticateSocket(messageService: MessageService) {
 }
 
 private fun Route.chatSocket(messageService: MessageService) {
-    webSocket("/api/messages/chat-socket") {
+    webSocket("/chat-socket") {
         val userId = call.request.queryParameters["u"]!!
         val key = call.request.queryParameters["k"]!!
         try {

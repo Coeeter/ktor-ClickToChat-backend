@@ -1,6 +1,6 @@
-package com.nasportfolio.data.notifications
+package com.nasportfolio.services.notifications
 
-interface NotificationDao {
+interface NotificationService {
     fun sendNotification(
         deviceToken: String,
         title: String,

@@ -3,7 +3,7 @@ package com.nasportfolio.routes.messages
 import com.nasportfolio.data.images.ImageDao
 import com.nasportfolio.data.message.Message
 import com.nasportfolio.data.message.MessageDao
-import com.nasportfolio.data.notifications.NotificationDao
+import com.nasportfolio.services.notifications.NotificationService
 import com.nasportfolio.data.user.UserDao
 import com.nasportfolio.routes.messages.exceptions.InvalidKeyException
 import com.nasportfolio.routes.messages.exceptions.MessageNotFoundException
@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap
 class MessageService(
     private val messageDao: MessageDao,
     private val userDao: UserDao,
-    private val notificationDao: NotificationDao,
+    private val notificationService: NotificationService,
     private val imageDao: ImageDao
 ) {
     private val keys = ConcurrentHashMap<String, SocketKey>()
@@ -140,7 +140,7 @@ class MessageService(
         val sender = userDao.getUserById(senderId) ?: return
         val receiver = userDao.getUserById(receiverId) ?: return
         receiver.fcmToken ?: return
-        notificationDao.sendNotification(
+        notificationService.sendNotification(
             deviceToken = receiver.fcmToken,
             title = "${sender.username} sent you a message",
             body = message,

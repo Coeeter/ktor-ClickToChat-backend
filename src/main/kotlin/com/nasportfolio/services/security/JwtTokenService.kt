@@ -1,4 +1,4 @@
-package com.nasportfolio.security
+package com.nasportfolio.services.security
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm

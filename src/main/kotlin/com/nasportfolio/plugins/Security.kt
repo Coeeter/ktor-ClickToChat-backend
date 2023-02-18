@@ -4,7 +4,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.nasportfolio.EnvConfig
 import com.nasportfolio.data.user.UserDao
-import com.nasportfolio.security.TokenService
+import com.nasportfolio.services.security.TokenService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*

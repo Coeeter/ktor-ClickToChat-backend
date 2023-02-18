@@ -1,12 +1,12 @@
-package com.nasportfolio.data.notifications
+package com.nasportfolio.services.notifications
 
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.Message
 import com.google.firebase.messaging.Notification
 
-class FcmNotificationDao(
+class FcmNotificationService(
     private val fcmMessaging: FirebaseMessaging
-) : NotificationDao {
+) : NotificationService {
     override fun sendNotification(
         deviceToken: String,
         title: String,

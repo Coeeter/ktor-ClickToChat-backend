@@ -7,7 +7,9 @@ import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
     routing {
-        userRoutes()
-        messageRoutes()
+        route(path = "/api") {
+            userRoutes()
+            messageRoutes()
+        }
     }
 }
