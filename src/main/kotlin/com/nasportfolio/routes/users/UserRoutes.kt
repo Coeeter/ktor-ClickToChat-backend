@@ -7,6 +7,7 @@ import com.nasportfolio.data.user.user
 import com.nasportfolio.routes.users.requests.LoginRequest
 import com.nasportfolio.routes.users.requests.SignUpRequest
 import com.nasportfolio.routes.users.requests.UpdateAccountRequest
+import com.nasportfolio.routes.users.requests.UpdatePasswordRequest
 import com.nasportfolio.routes.users.responses.TokenResponse
 import com.nasportfolio.routes.users.responses.toUserDto
 import com.nasportfolio.security.HashingService
@@ -30,6 +31,7 @@ fun Route.userRoutes() {
     getAllUsersRoute(userDao)
     searchForUsers(userDao)
     updateAccount(userDao)
+    updatePassword(userDao, hashingService)
     register(userDao, tokenService, hashingService)
     login(userDao, tokenService, hashingService)
     deleteAccount(userDao)
@@ -102,6 +104,33 @@ private fun Route.updateAccount(userDao: UserDao) {
     }
 }
 
+private fun Route.updatePassword(
+    userDao: UserDao,
+    hashingService: HashingService
+) {
+    authenticate {
+        put("/api/users/password") {
+            val user = call.user!!
+            val request = call.receive<UpdatePasswordRequest>()
+            val isCorrectOldPassword = hashingService.verify(request.oldPassword, user.password)
+            if (!isCorrectOldPassword) return@put call.respond(
+                HttpStatusCode.Unauthorized,
+                mapOf("error" to "Invalid old password given")
+            )
+            val isSamePassword = request.oldPassword == request.password
+            if (isSamePassword) return@put call.respond(
+                HttpStatusCode.BadRequest,
+                mapOf("error" to "New password cannot be same as old password!")
+            )
+            val updatedUser = user.copy(
+                password = hashingService.hash(request.password)
+            )
+            userDao.updateUser(updatedUser)
+            call.respond(HttpStatusCode.OK)
+        }
+    }
+}
+
 private fun Route.register(
     userDao: UserDao,
     tokenService: TokenService,
@@ -151,7 +180,7 @@ private fun Route.login(
         val body = call.receive<LoginRequest>()
         val user = userDao.getUserByEmail(body.email)
         user ?: return@post call.respond(HttpStatusCode.NotFound)
-        if (hashingService.verify(body.password, user.password)) {
+        if (!hashingService.verify(body.password, user.password)) {
             return@post call.respond(HttpStatusCode.Unauthorized)
         }
         val token = tokenService.generateToken(
